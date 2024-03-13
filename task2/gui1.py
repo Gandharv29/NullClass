@@ -1,5 +1,3 @@
-import keras	
-import os
 import cv2
 import numpy as np
 from keras.preprocessing import image
@@ -68,9 +66,9 @@ while True:
             break
 
     except sr.UnknownValueError:
-        print("Speech Recognition could not understand audio")
+        print("The audio cant be understood")
     except sr.RequestError as e:
-        print("Could not request results from Speech Recognition service; {0}".format(e))
+        print("Could not request results from Speech Recognition ; {0}".format(e))
 
   
     if cv2.waitKey(10) == ord('q'):
