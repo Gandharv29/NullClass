@@ -1,19 +1,28 @@
 from keras.models import load_model
-from time import sleep
 from keras.models import model_from_json
 from keras.preprocessing.image import img_to_array
 from keras.preprocessing import image
 import cv2
 import numpy as np
+import os 
 
-face_classifier = cv2.CascadeClassifier(r'C:\Users\Arun\Desktop\emotion_detector\task1\haarcascade_frontalface_alt.xml')
+base_dir = "null_class_intern\task1"
+
+model_path = os.path.join(base_dir, "model.json")
+xml_path = os.path.join(base_dir, "haarcascade_frontalface_default.xml")
+
+
+face_classifier = cv2.CascadeClassifier(xml_path)
 
 def FacilaExpressionModel(json_file):
     with open (json_file,'r') as file:
         loaded_model_json=file.read()
         model=model_from_json(loaded_model_json)
     return model
-clf=FacilaExpressionModel("task1\model.json")
+
+
+
+clf=FacilaExpressionModel(model_path)
 emotion_labels = ['Angry','Disgust','Fear','Happy','Neutral', 'Sad', 'Surprise']
 
 cap = cv2.VideoCapture(0)
