@@ -10,13 +10,11 @@ import speech_recognition as sr
 import tensorflow as tf
 import os 
 
-base_dir = "null_class_intern\task2"
 
-model_path = os.path.join(base_dir, "model1.h5")
-xml_path = os.path.join(base_dir, "haarcascade_frontalface_default.xml")
+model_path="task2\model1.h5"
 
 model = load_model(model_path)
-face_haar_cascade = cv2.CascadeClassifier(xml_path)
+face_haar_cascade = cv2.CascadeClassifier("task2\haarcascade_frontalface_default.xml")
 
 cap = cv2.VideoCapture(0)
 
