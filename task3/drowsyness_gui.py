@@ -1,54 +1,62 @@
 import cv2
-import face_recognition
+from imutils import face_utils
+import imutils
 import numpy as np
 from scipy.spatial import distance
+import dlib
 
-def eye_aspect_ratio(eye):
 
-    A = distance.euclidean(eye[1], eye[5])
-    B = distance.euclidean(eye[2], eye[4])
-    C = distance.euclidean(eye[0], eye[3])
-    ear = (A + B) / (2.0 * C)
-    return ear
-
+def EAR(eye):
+	a = distance.euclidean(eye[1], eye[5])
+	b= distance.euclidean(eye[2], eye[4])
+	c= distance.euclidean(eye[0], eye[3])
+	ear = (a + b) / (2.0 * c)
+	return ear
+	
 thresh = 0.20
 frame_check = 20
+detect = dlib.get_frontal_face_detector()
+model_path="task3\shape_predictor_68_face_landmarks.dat"
+predict = dlib.shape_predictor(model_path)
 
-(lStart, lEnd) = (42, 48)
-(rStart, rEnd) = (36, 42)
-
-cap = cv2.VideoCapture(0)
-flag = 0
-
+(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
+(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["right_eye"]
+cap=cv2.VideoCapture(0)
+flag=0
 while True:
-    ret, frame = cap.read()
-    rgb_frame = frame[:, :, ::-1]
+	ret, frame=cap.read()
+	frame = imutils.resize(frame, width=450)
+	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	subjects = detect(gray, 0)
+	for subject in subjects:
+		shape = predict(gray, subject)
+		shape = face_utils.shape_to_np(shape)
+		leftEye = shape[lStart:lEnd]
+		rightEye = shape[rStart:rEnd]
+		leftEAR = EAR(leftEye)
+		rightEAR = EAR(rightEye)
+		ear = (leftEAR + rightEAR) / 2.0
+		
+		leftEyeHull = cv2.convexHull(leftEye)
+		rightEyeHull = cv2.convexHull(rightEye)
+		
 
-    face_locations = face_recognition.face_locations(rgb_frame)
-    face_landmarks_list = face_recognition.face_landmarks(rgb_frame)
+		cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+		cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+		if ear < thresh:
+			flag += 1
+			print (flag)
+			if flag >= frame_check:
+				cv2.putText(frame, "Drowsy", (10, 30),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+				print ("Drowsy")
 
-    for face_landmarks in face_landmarks_list:
-        leftEye = np.array(face_landmarks["left_eye"])
-        rightEye = np.array(face_landmarks["right_eye"])
-        leftEAR = eye_aspect_ratio(leftEye)
-        rightEAR = eye_aspect_ratio(rightEye)
-        ear = (leftEAR + rightEAR) / 2.0
-        cv2.polylines(frame, [leftEye], True, (0, 255, 0), 1)
-        cv2.polylines(frame, [rightEye], True, (0, 255, 0), 1)
-        if ear < thresh:
-            flag += 1
-            print(flag)
-            if flag >= frame_check:
-                cv2.putText(frame, "Drowsy", (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                print ("Drowsy")
-        else:
-            flag = 0
-
-    cv2.imshow("Frame", frame)
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
-
+		else:
+			flag = 0
+	cv2.imshow("Frame", frame)
+	key = cv2.waitKey(1) & 0xFF
+	if key == ord("q"):
+		break
 cv2.destroyAllWindows()
-cap.release()
+cap.release() 
+
