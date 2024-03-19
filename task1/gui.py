@@ -6,13 +6,12 @@ import cv2
 import numpy as np
 import os 
 
-base_dir = "null_class_intern\task1"
+base_dir = "NullClass\task1"
 
-model_path = os.path.join(base_dir, "model.json")
-xml_path = os.path.join(base_dir, "haarcascade_frontalface_default.xml")
+model_path =  "task1\model.json"
+# xml_path = "task1\haarcascade_frontalface_default.xml"
 
-
-face_classifier = cv2.CascadeClassifier(xml_path)
+face_classifier = cv2.CascadeClassifier("task1\haarcascade_frontalface_alt.xml")
 
 def FacilaExpressionModel(json_file):
     with open (json_file,'r') as file:
@@ -57,3 +56,6 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+
